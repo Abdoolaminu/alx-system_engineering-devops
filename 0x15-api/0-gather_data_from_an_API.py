@@ -1,25 +1,41 @@
 #!/usr/bin/python3
-"""gets api"""
+"""A script to return information about
+Todos list progress of employees given
+their ID's
+"""
+
+import os
 import requests
-from sys import argv
+import sys
 
 
-def todo(userid):
-    """doc stringed"""
-    name = requests.get(
-        'https://jsonplaceholder.typicode.com/users/{}'.format(
-            userid)).json().get('name')
-    tasks = requests.get(
-        'https://jsonplaceholder.typicode.com/users/{}/todos'.format(
-            userid)).json()
-    tasksDone = ['\t {}\n'.format(dic.get('title')) for dic in tasks
-                 if dic.get('completed')]
-    if name and tasks:
-        print("Employee {} is done with tasks({}/{}):".format
-              (name, len(tasksDone), len(tasks)))
-        print(''.join(tasksDone), end='')
-
-
-if __name__ == "__main__":
-    if len(argv) == 2:
-        todo(int(argv[1]))
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        raise("Please enter the user Id you wish to find details about")
+    url_a = 'https://jsonplaceholder.typicode.com/todos'
+    url_b = 'https://jsonplaceholder.typicode.com/users'
+    payload = {'userId': str(sys.argv[1])}
+    try:
+        req_b = requests.get(url_b)
+        json_b = req_b.json()
+        idx = int(sys.argv[1])
+        count = 0
+        completed = 0
+        titles = []
+        for i in json_b:
+            if i.get("id") == idx:
+                name = i.get("name")
+        req_a = requests.get(url_a, params=payload)
+        json_a = req_a.json()
+        for j in json_a:
+            count += 1
+            if j.get("completed"):
+                completed += 1
+                titles.append(j.get("title"))
+        print(f"Employee {name} is done with tasks({completed}/{count}):")
+        [print("\t" + " " + t) for t in titles]
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print("Error!")
+        print(exc_type, fname, exc_tb.tb_lineno)
