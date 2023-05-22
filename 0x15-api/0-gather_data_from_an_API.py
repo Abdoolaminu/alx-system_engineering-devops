@@ -1,41 +1,35 @@
 #!/usr/bin/python3
-"""A script to return information about
-Todos list progress of employees given
-their ID's
-"""
-
-import os
-import requests
-import sys
+'''
+Using the JSONPlaceholder API, returns the TODO list
+corresponding to a given employee ID.
+USAGE:
+>$ ./0-gather_data_from_an_API.py <NUMERIC_ID>
+Employee [EMPLOYEE_NAME] is done with tasks(#_DONE_TASKS/TOTAL_#_TASKS):
+     distinctio vitae autem nihil ut molestias quo
+     voluptas quo tenetur perspiciatis explicabo natus
+     aliquam aut quasi
+     veritatis pariatur delectus
+     nemo perspiciatis repellat ut dolor libero commodi blanditiis omnis
+     repellendus veritatis molestias dicta incidunt
+     excepturi deleniti adipisci voluptatem et neque optio illum ad
+     totam atque quo nesciunt
+'''
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        raise("Please enter the user Id you wish to find details about")
-    url_a = 'https://jsonplaceholder.typicode.com/todos'
-    url_b = 'https://jsonplaceholder.typicode.com/users'
-    payload = {'userId': str(sys.argv[1])}
+    from requests import get
+    from sys import argv
+
     try:
-        req_b = requests.get(url_b)
-        json_b = req_b.json()
-        idx = int(sys.argv[1])
-        count = 0
-        completed = 0
-        titles = []
-        for i in json_b:
-            if i.get("id") == idx:
-                name = i.get("name")
-        req_a = requests.get(url_a, params=payload)
-        json_a = req_a.json()
-        for j in json_a:
-            count += 1
-            if j.get("completed"):
-                completed += 1
-                titles.append(j.get("title"))
-        print(f"Employee {name} is done with tasks({completed}/{count}):")
-        [print("\t" + " " + t) for t in titles]
-    except Exception as e:
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print("Error!")
-        print(exc_type, fname, exc_tb.tb_lineno)
+        URL = "https://jsonplaceholder.typicode.com"
+        ID = argv[1]
+        employee = get(URL + "/users/" + ID).json()
+        name = employee.get('username')
+        all_tasks = get(URL + "/todos?userId=" + ID).json()
+        done_tasks = [task.get('title')
+                      for task in all_tasks if task.get('completed')]
+        print("Employee {} is done with tasks({}/{}):"
+              .format(name, len(done_tasks), len(all_tasks)))
+        print("\t", "\n\t ".join(done_tasks))
+    except IndexError:
+        print("USAGE: ./0-gather_data_from_an_API.py <NUMERIC_ID>")
