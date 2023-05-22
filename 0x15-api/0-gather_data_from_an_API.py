@@ -1,24 +1,25 @@
 #!/usr/bin/python3
-'''
-Module contains python script for making an api call
-'''
+"""gets api"""
 import requests
-import sys
+from sys import argv
 
 
-if __name__ == '__main__':
+def todo(userid):
+    """doc stringed"""
+    name = requests.get(
+        'https://jsonplaceholder.typicode.com/users/{}'.format(
+            userid)).json().get('name')
+    tasks = requests.get(
+        'https://jsonplaceholder.typicode.com/users/{}/todos'.format(
+            userid)).json()
+    tasksDone = ['\t {}\n'.format(dic.get('title')) for dic in tasks
+                 if dic.get('completed')]
+    if name and tasks:
+        print("Employee {} is done with tasks({}/{}):".format
+              (name, len(tasksDone), len(tasks)))
+        print(''.join(tasksDone), end='')
 
-    user_id = sys.argv[1]
-    url = 'https://jsonplaceholder.typicode.com/users/{}/'.format(user_id)
-    todos_url = url + 'todos'
-    user = requests.get(url).json()
-    todos = requests.get(todos_url).json()
 
-    completed_todos = [todo for todo in todos if todo.get('completed') is True]
-
-    print('Employee {} is done with tasks({}/{}):'.format(user.get('name'),
-                                                          len(completed_todos),
-                                                          len(todos)))
-
-    for todo in completed_todos:
-        print('\t {}'.format(todo.get('title')))
+if __name__ == "__main__":
+    if len(argv) == 2:
+        todo(int(argv[1]))
